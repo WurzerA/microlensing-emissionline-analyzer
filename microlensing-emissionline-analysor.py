@@ -46,7 +46,7 @@ class Program:
 
         self.fig = plt.figure()
         self.master = master
-        self.master.title("Microlensing calculations")
+        self.master.title("Microlensing-Emission-Line-Analyser")
         self.master.protocol('WM_DELETE_WINDOW', self.close_program)
         self.master.geometry('950x650')
 
