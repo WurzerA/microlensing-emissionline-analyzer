@@ -1,14 +1,13 @@
 import numpy as np
 import matplotlib
 
-matplotlib.use("TkAgg")
+matplotlib.use("TkAgg")  # Positioned here to fix issue on macOS devices which caused the app to malfunction
 import matplotlib.pyplot as plt
 from tkinter import *
 from tkinter import filedialog
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
 from os.path import basename
-import statistics
 import lines_exact
 
 # Define all globals
@@ -71,7 +70,7 @@ class Program:
 
         self.frame_output = LabelFrame(master, text='Output ------- Blue wing --------------------------'
                                                     '----------------- Red wing')
-        # , bg = 'white'
+
         self.frame_output.grid(row=7, column=1)
 
         global y_label
@@ -187,14 +186,19 @@ class Program:
         self.shift2.grid(row=1, column=0)
         self.shift2.config(state=DISABLED)
 
-        # Button to shift core
-        self.button_shift_core_plus = Button(self.frame_cores, text='Shift +1 \u212B', state=DISABLED, command=
-        match.shift_spectrum_right)
+        # Button to shift core (+)
+        self.button_shift_core_plus = Button(self.frame_cores,
+                                             text='Shift +1 \u212B',
+                                             state=DISABLED,
+                                             command=match.shift_spectrum_right)
         self.button_shift_core_plus.grid(row=0, column=1, sticky=W, padx=3, pady=3)
         self.button_shift_core_plus.config(width=10, state=DISABLED)
-        # Button to shift core
-        self.button_shift_core_minus = Button(self.frame_cores, text='Shift -1 \u212B', state=DISABLED, command=
-        match.shift_spectrum_left)
+
+        # Button to shift core (-)
+        self.button_shift_core_minus = Button(self.frame_cores,
+                                              text='Shift -1 \u212B',
+                                              state=DISABLED,
+                                              command=match.shift_spectrum_left)
         self.button_shift_core_minus.grid(row=1, column=1, sticky=W, padx=3, pady=3)
         self.button_shift_core_minus.config(width=10, state=DISABLED)
 
@@ -210,7 +214,7 @@ class Program:
 
         # Button to save plot
         self.button_save = Button(self.frame_save, text='Save as txt file', state=DISABLED,
-                                  command=self.data.save_astxt)
+                                  command=self.data.save_as_txt)
         self.button_save.grid(row=0, column=0, sticky=W, padx=3, pady=3)
         self.button_save.config(width=15)
 
@@ -394,7 +398,7 @@ class Program:
         self.text_output_red.config(state=DISABLED)
 
 
-# Handels data: Reads data from file and save it in spectrum_list
+# Handles data: Reads data from file and save it in spectrum_list
 class GetData:
     def __init__(self):
         global spectrum_list
@@ -428,9 +432,9 @@ class GetData:
 
         return np.array(file_content), basename_file
 
-
+    # Save as txt file
     @staticmethod
-    def save_astxt():
+    def save_as_txt():
         f = filedialog.asksaveasfile(mode='w', defaultextension=".txt", filetypes=(("text file", "*.txt"),
                                                                                    ("all files", "*.*")), title='test')
         if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
@@ -440,20 +444,22 @@ class GetData:
 
         f.close()
 
-    # @staticmethod
-    # def save_astxt():
-    #     f = filedialog.asksaveasfile(mode='w', defaultextension=".csv", filetypes=(("CSV file", "*.csv"),
-    #                                                                                ("all files", "*.*")), title='test')
-    #     if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
-    #         return
-    #     f.write("x_1[A];y_1;x_2[A];y_2\n")
-    #     for item in zip(spectrum_list[0].x, spectrum_list[0].y, spectrum_list[1].x, spectrum_list[1].y):
-    #         f.write("%s;%s;%s;%s\n" % (item[0], item[1], item[2], item[3]))  # "%i %5.2f\n"
-    #
-    #     f.close()
+    # Alternative: Save as CSV file
+    @staticmethod
+    def save_as_csv():
+        f = filedialog.asksaveasfile(mode='w', defaultextension=".csv", filetypes=(("CSV file", "*.csv"),
+                                                                                   ("all files", "*.*")),
+                                     title='test')
+        if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
+            return
+        f.write("x_1[A];y_1;x_2[A];y_2\n")
+        for item in zip(spectrum_list[0].x, spectrum_list[0].y, spectrum_list[1].x, spectrum_list[1].y):
+            f.write("%s;%s;%s;%s\n" % (item[0], item[1], item[2], item[3]))  # "%i %5.2f\n"
+
+        f.close()
 
 
-# Handels the plot
+# Handles the plot
 class Plot:
     def __init__(self, program):
         self.program = program
@@ -562,8 +568,6 @@ class Plot:
         print_only_once = 0
         spectrum_list.clear()
         self.close_plot()
-        #self.fig.clear()
-        #self.fig.canvas.draw()
 
         if fit_list:
             fit_list.clear()
@@ -586,16 +590,13 @@ class Plot:
 
         self.plot(spectrum_list)
 
-        # global microlen
-        # microlen = Microlensing(self)
-
     def close_plot(self):
         if self.fig is not None:
             plt.close(self.fig)
             plt.clf()
             self.fig = None
 
-    # Handels the zoom in function for the lines. A specific x range is taken.
+    # Handles the zoom in function for the lines. A specific x range is taken.
     def x_range(self, lines, linename):
         self.close_plot()
         self.plot([])
@@ -705,21 +706,8 @@ class Plot:
                 print('--------------------------------------')
                 print_only_once = print_only_once + 1
 
-        #        self.program.text_output_red.delete(1.0, END)
-        #        self.program.text_output_red.insert(END, 'Mean core Spectrum 1: ')
-        #        self.program.text_output_red.insert(END, np.round(np.mean(y_range),2))
-        #        self.program.text_output_red.insert(END, 'Std core : ')
-        #        self.program.text_output_red.insert(END, np.round(np.std(y_range),2))
-        #
-        #        self.program.text_output_blue.delete(1.0, END)
-        #        self.program.text_output_blue.insert(END, 'Mean core Spectrum 1: ')
-        #        self.program.text_output_blue.insert(END, np.round(np.mean(y_range),2))
-        #        self.program.text_output_blue.insert(END, 'Std core: ')
-        #        self.program.text_output_blue.insert(END, np.round(np.std(y_range),2))
-
     def plot_anywhere(self):  # Plotting in any class of this program
         self.close_plot()
-        # self.fig.clear()
         self.plot(spectrum_list)
         self.fig.canvas.draw()
 
@@ -731,7 +719,7 @@ class Plot:
             self.x_range(lines_mg2, 'MgII')
 
 
-# Handels the location of the mouse in order to get the coordinates for the linear fits.
+# Handles the location of the mouse in order to get the coordinates for the linear fits.
 class MouseLocation:
     def __init__(self, master, program):
         self.program = program
@@ -755,7 +743,7 @@ class MouseLocation:
                 self.program.button_linfit.config(state=NORMAL, command=lin.make_linfit)
 
 
-# Handels the linear fits.
+# Handles the linear fits.
 # y coordinates not used in this type of fitting.
 class LinearFit:
     def __init__(self, program, x_fit, y_fit):
@@ -806,18 +794,6 @@ class LinearFit:
         print('Mean continuum std: ', np.round(np.std(y_values_red), 2))
         print('--------------------------------------')
         print()
-        #
-        #        self.program.text_output_red.delete(1.0, END)
-        #        self.program.text_output_red.insert(END, 'Mean continuum red: ')
-        #        self.program.text_output_red.insert(END, np.round(y_fit_red,2))
-        #        self.program.text_output_red.insert(END, 'Mean continuum red std: ')
-        #        self.program.text_output_red.insert(END, '{:12.2f}'.format(np.round(np.std(y_values_red),2)))
-        #
-        #        self.program.text_output_blue.delete(1.0, END)
-        #        self.program.text_output_blue.insert(END, 'Mean continuum blue: ')
-        #        self.program.text_output_blue.insert(END, '{:12.2f}'.format(np.round(y_fit_blue,2)))
-        #        self.program.text_output_blue.insert(END, '\n Mean continuum blue std: ')
-        #        self.program.text_output_blue.insert(END, '{:12.2f}'.format(np.round(np.std(y_values_blue),2)))
         #########################################################################################################
 
         # Just as many fits possible as spectra available
@@ -890,8 +866,6 @@ class LinearFit:
         self.program.r4.config(state=NORMAL)
 
         spectrum_list.clear()
-        # p.fig.clear()
-        # p.close_plot()
 
         if fit_list:
             fit_list.clear()
@@ -968,7 +942,7 @@ class LinearFit:
             self.program.button_shift_core_minus.config(state=NORMAL)
 
 
-# Handels the line cores in order to match them. Calculate mean intensity maxima
+# Handles the line cores in order to match them. Calculate mean intensity maxima
 # Additionally, the mean core values are printed after shifting and bevore matching the cores
 class MatchCores:
     def __init__(self, program):
@@ -995,18 +969,12 @@ class MatchCores:
                 core_list1.append(spectrum_list[0].y[i])
 
         mean_intensity_core1 = np.mean(core_list1)
-        # print('Mean core 0 intensity after shift: ', np.round(mean_intensity_core1, 2))
-        # print('Std: ', np.round(np.std(core_list1), 2))
 
         for i in range(len(spectrum_list[1].x)):
             if self.core - core_span < spectrum_list[1].x[i] < self.core + core_span:
                 core_list2.append(spectrum_list[1].y[i])
 
         mean_intensity_core2 = np.mean(core_list2)
-        # print('Mean core 1 intensity after shift: ', np.round(mean_intensity_core2, 2))
-        # print('Std: ', np.round(np.std(core_list2), 2))
-        # print('')
-        # print('Mean core 0 / mean core 1: ', np.round(mean_intensity_core1/mean_intensity_core2, 2))
 
         # Which intensity is the higher one
         if mean_intensity_core1 < mean_intensity_core2:
@@ -1046,7 +1014,7 @@ class MatchCores:
         p.plot_anywhere()
 
 
-# Handels the microlensing calculations and output
+# Handles the microlensing calculations and output
 class Microlensing:
     def __init__(self, program):
         # Initial values for buffer and interval
@@ -1140,14 +1108,6 @@ class Microlensing:
         yinterp_0_red = np.interp(x_interpolated_red, spectrum_list_wings_red[0].x, spectrum_list_wings_red[0].y)
         yinterp_1_red = np.interp(x_interpolated_red, spectrum_list_wings_red[1].x, spectrum_list_wings_red[1].y)
 
-        # print(len(yinterp_0_blue))
-        # print(len(yinterp_1_blue))
-        # print(len(yinterp_0_red))
-        # print(len(yinterp_1_red))
-        #
-        # print()
-        # print(yinterp_0_blue)
-
         spectrum_list_wings_red[0].x = x_interpolated_red
         spectrum_list_wings_red[0].y = yinterp_0_red
 
@@ -1160,18 +1120,12 @@ class Microlensing:
         spectrum_list_wings_blue[1].x = x_interpolated_blue
         spectrum_list_wings_blue[1].y = yinterp_1_blue
 
-        #print(len(spectrum_list_wings_blue[0].y))
-        #print()
-        #print(len(spectrum_list_wings_blue[1].y))
-
         #########################################################################################################
         # Blue wing
         #########################################################################################################
         # Are enough values in lists? Minimum values required: 2 because of the calculation of the stdv
         for n in range(0, 2):
             if len(spectrum_list_wings_blue[n].y) < 2:
-                #print('blue[' + str(n) + '] ->')
-                #print(spectrum_list_wings_blue[n].y)
                 self.program.text_output_blue.delete(1.0, END)
                 self.program.text_output_blue.insert(END, 'Number of values too low.')
                 low_number_test_blue = True
@@ -1214,9 +1168,6 @@ class Microlensing:
         # Are enough values in lists? Minimum values required: 2 because of the calculation of the stdv
         for n in range(0, 2):
             if len(spectrum_list_wings_red[n].y) < 2:
-                # print('red[' + str(n) + '] ->')
-                # print(spectrum_list_wings_red[n].y)
-
                 self.program.text_output_red.delete(1.0, END)
                 self.program.text_output_red.insert(END, 'Number of values too low.')
                 low_number_test_red = True
@@ -1232,7 +1183,6 @@ class Microlensing:
 
             if not negative_test_red:
                 for n in range(0, 2):
-                    #print('red', spectrum_list_wings_red[n].y)
                     for i in range(len(spectrum_list_wings_red[n].y)):
                         spectrum_list_wings_red[n].y[i] = -2.5 * np.log10(spectrum_list_wings_red[n].y[i])
                 # Calculate delta magnitude red wing
@@ -1242,7 +1192,7 @@ class Microlensing:
                     denominator = spectrum_list_wings_red[0].y[i] + spectrum_list_wings_red[1].y[i]
                     w_i = np.sqrt(((spectrum_list_wings_red[0].y[i] + spectrum_list_wings_red[
                         1].y[i]) / 2) / denominator)
-                    result = w_i  * (spectrum_list_wings_red[1].y[i] - spectrum_list_wings_red[0].y[i])
+                    result = w_i * (spectrum_list_wings_red[1].y[i] - spectrum_list_wings_red[0].y[i])
                     self.delta_magnitude_red.append(result)
 
                 self.program.text_output_red.delete(1.0, END)
@@ -1263,7 +1213,6 @@ class Spectrum:
         self.y = y
         self.basename = name
         self.is_linear_fit = is_linear_fit
-
 
 
 root = Tk()
